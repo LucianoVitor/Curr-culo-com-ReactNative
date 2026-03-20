@@ -6,10 +6,11 @@ import {
   ScrollView, 
   StatusBar, 
   SafeAreaView, 
-  TouchableOpacity 
+  TouchableOpacity,
+  Linking 
 } from 'react-native';
+import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 
-// --- DADOS DO CURRÍCULO CORRIGIDOS ---
 const resumeData = {
   header: {
     name: 'Luciano Rodrigues Campos Vitor',
@@ -17,33 +18,31 @@ const resumeData = {
     location: 'SÃO PAULO - SP',
     contact: {
       email: 'luciano.vitor@fatec.sp.gov.br',
-      linkedin: 'linkedin.com/in/LucianoVitor',
-      github: 'github.com/LucianoVitor',
+      linkedin: 'https://linkedin.com/in/LucianoVitor',
+      github: 'https://github.com/LucianoVitor',
     }
   },
   summary: 'Busco oportunidade de estágio na área de desenvolvimento de software, visando aplicar e aprimorar meus conhecimentos em tecnologias web e mobile.',
   experience: [
     {
       role: 'Vendedor',
-      company: 'RIOS TERCEIRIZAÇÃO & COWORKING LTDA (NET SOFÁS / DDS SOFÁS)',
+      company: 'RIOS TERCEIRIZAÇÃO & COWORKING LTDA',
       period: 'Mar/2025 - Out/2025',
-      // CORREÇÃO: Transformamos a descrição em uma única String com quebras de linha (\n)
-      description: '● Continuidade nas atividades de venda direta ao cliente.\n● Participação em treinamentos internos para aprimoramento da comunicação e atendimento ao público.\n● Suporte em campanhas promocionais e metas comerciais da loja.\n● Atendimento personalizado, prezando pela experiência do cliente e fidelização.',
+      description: '● Venda direta e atendimento personalizado.\n● Treinamentos de comunicação e metas comerciais.',
     },
     {
       role: 'Vendedor',
-      company: 'NBA - LOCAÇÃO DE MÃO DE OBRA ESPECIALIZADA LTDA',
+      company: 'NBA - LOCAÇÃO DE MÃO DE OBRA',
       period: 'Jul/2024 - Jan/2025',
-      description: '● Atendimento ao cliente no setor de vendas de sofás e estofados.\n● Auxílio na organização do showroom e na reposição de modelos em exposição.\n● Apoio no processo de venda: demonstração de produtos e finalização de pedidos.\n● Desenvolvimento de habilidades de negociação, escuta ativa e empatia.',
+      description: '● Atendimento no setor de estofados.\n● Desenvolvimento de habilidades de negociação.',
     },
     {
       role: 'Auxiliar de Escritório',
       company: 'CHARUTOS E PRESENTES',
       period: 'Dez/2023 - April/2024',
-      description: '● Processo de venda e despacho de pedidos (dúvidas, conferência, embalagem e envio).\n● Experiência em plataformas de ERP como Tiny.\n● Atendimento de clientes via WhatsApp, e-mail e telefone.\n● Organização de estoque, entrada de produtos e limpeza do ambiente.',
+      description: '● Gestão de pedidos e ERP Tiny.\n● Atendimento multicanal e organização de estoque.',
     },
   ],
-  // CORREÇÃO: Education agora é uma lista [] para suportar Fatec E Etec
   education: [
     {
       course: 'Tecnologia em Desenvolvimento de Software Multiplataforma',
@@ -54,13 +53,21 @@ const resumeData = {
     {
       course: 'Técnico em Desenvolvimento de Sistemas',
       institution: 'Etec Zona Leste',
-      period: 'Cursou (Início: 2021)',
+      period: 'Concluído em 2023',
       status: 'CONCLUÍDO',
     }
   ],
   skills: {
-    hard: ['Node.js', 'React Native', 'JavaScript/TS', 'SQL/NoSQL', 'Git/GitHub', 'Figma', 'Linux'],
-    soft: ['Comunicação', 'Trabalho em Equipe', 'Proatividade', 'Resolução de Problemas', 'Adaptabilidade'],
+    hard: ['Node.js', 'React Native', 'JavaScript/TS', 'SQL/NoSQL', 'Git/GitHub'],
+    soft: ['Comunicação', 'Trabalho em Equipe', 'Proatividade', 'Resolução de Problemas'],
+  },
+  academicFuture: {
+    goal: 'Interesse em seguir carreira na área de Inteligência Artificial e Ciência de Dados.',
+    focus: 'Aprofundamento em algoritmos de Machine Learning e automação.'
+  },
+  objectives: {
+    shortTerm: 'Atuar como desenvolvedor júnior focado em soluções Fullstack.',
+    longTerm: 'Tornar-se arquiteto de softwares e liderar times de engenharia.'
   },
   languages: [
     { lang: 'Inglês', level: 'BÁSICO' },
@@ -68,7 +75,7 @@ const resumeData = {
   ]
 };
 
-// --- COMPONENTES ---
+// --- COMPONENTES AUXILIARES ---
 
 const TimelineItem = ({ data }: { data: any }) => (
   <View style={styles.timelineItem}>
@@ -85,16 +92,23 @@ const TimelineItem = ({ data }: { data: any }) => (
   </View>
 );
 
+const SectionTitle = ({ title }: { title: string }) => (
+  <Text style={styles.sectionTitle}>{`[ ${title} ]`}</Text>
+);
+
+// Componente para a tabela de idiomas
 const LanguageTable = ({ data }: { data: any[] }) => (
   <View style={styles.table}>
     {data.map((item, index) => (
       <View key={index} style={styles.tableRow}>
-        <Text style={[styles.tableCell, styles.tableCellLabel]}>{item.lang}</Text>
-        <Text style={[styles.tableCell, styles.tableCellLevel]}>:: {item.level} ::</Text>
+        <Text style={styles.tableCellLabel}>{item.lang}</Text>
+        <Text style={styles.tableCellLevel}>:: {item.level} ::</Text>
       </View>
     ))}
   </View>
 );
+
+// --- COMPONENTE PRINCIPAL ---
 
 const App = () => {
   return (
@@ -102,70 +116,96 @@ const App = () => {
       <StatusBar barStyle="light-content" backgroundColor="#000" />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         
+        {/* HEADER */}
         <View style={styles.headerCard}>
           <View style={styles.profileHexagon}><View style={styles.profileInner} /></View>
           <Text style={styles.nameText}>{resumeData.header.name}</Text>
           <Text style={styles.subTitle}>{resumeData.header.title}</Text>
           <Text style={styles.location}>{resumeData.header.location}</Text>
-          <View style={styles.contactBar}>
-            {Object.values(resumeData.header.contact).map((link, i) => (
-              <Text key={i} style={styles.contactLink}>{link}</Text>
-            ))}
+          
+          <View style={styles.iconContainer}>
+            <TouchableOpacity onPress={() => Linking.openURL(resumeData.header.contact.github)}>
+              <AntDesign name="github" size={30} color="#FF0000" style={styles.socialIcon} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity onPress={() => Linking.openURL(resumeData.header.contact.linkedin)}>
+              <AntDesign name="linkedin-square" size={30} color="#FF0000" style={styles.socialIcon} />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => Linking.openURL(`mailto:${resumeData.header.contact.email}`)}>
+              <MaterialCommunityIcons name="email-fast" size={32} color="#FF0000" style={styles.socialIcon} />
+            </TouchableOpacity>
           </View>
         </View>
 
+        {/* RESUMO */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>[ RESUMO PROFISSIONAL ]</Text>
+          <SectionTitle title="RESUMO PROFISSIONAL" />
           <View style={styles.card}>
             <Text style={styles.summaryText}>{resumeData.summary}</Text>
           </View>
         </View>
 
+        {/* EXPERIÊNCIA */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>[ EXPERIENCIA PROFISSIONAL ]</Text>
+          <SectionTitle title="EXPERIÊNCIA PROFISSIONAL" />
           {resumeData.experience.map((exp, index) => (
             <TimelineItem key={index} data={exp} />
           ))}
         </View>
 
+        {/* FORMAÇÃO */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>[ FORMACAO ACADEMICA ]</Text>
-          {/* CORREÇÃO: Mapeando a lista de educação para aparecerem todas */}
+          <SectionTitle title="FORMAÇÃO ACADÊMICA" />
           {resumeData.education.map((edu, index) => (
-            <View key={index} style={[styles.card, {marginBottom: 10}]}>
+            <View key={index} style={[styles.card, { marginBottom: 10 }]}>
               <Text style={styles.cardTitle}>{edu.institution}</Text>
               <Text style={styles.cardInfo}>{edu.course}</Text>
-              <Text style={styles.cardPeriod}>{edu.period}</Text>
               <Text style={styles.cardStatus}>{edu.status}</Text>
             </View>
           ))}
         </View>
 
+        {/* FUTURO ACADÊMICO */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>[ HABILIDADES TÉCNICAS ]</Text>
+          <SectionTitle title="FUTURO ACADÊMICO & CARREIRA" />
+          <View style={styles.card}>
+            <Text style={styles.highlightText}>FOCO:</Text>
+            <Text style={styles.summaryText}>{resumeData.academicFuture.goal}</Text>
+          </View>
+        </View>
+
+        {/* OBJETIVOS */}
+        <View style={styles.section}>
+          <SectionTitle title="EMPRESAS E OBJETIVOS" />
+          <View style={styles.card}>
+            <Text style={styles.highlightText}>CURTO PRAZO:</Text>
+            <Text style={styles.summaryText}>{resumeData.objectives.shortTerm}</Text>
+            <Text style={[styles.highlightText, {marginTop: 10}]}>LONGO PRAZO:</Text>
+            <Text style={styles.summaryText}>{resumeData.objectives.longTerm}</Text>
+          </View>
+        </View>
+
+        {/* SKILLS */}
+        <View style={styles.section}>
+          <SectionTitle title="SKILLS" />
           <View style={styles.skillsGrid}>
             {resumeData.skills.hard.map(skill => (
               <View key={skill} style={styles.skillBadge}><Text style={styles.skillText}>{skill}</Text></View>
             ))}
           </View>
         </View>
-        
+
+        {/* IDIOMAS */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>[ HABILIDADES COMPORTAMENTAIS ]</Text>
-          <View style={styles.skillsGrid}>
-            {resumeData.skills.soft.map(skill => (
-              <View key={skill} style={styles.softSkillBadge}><Text style={styles.softSkillText}>{skill}</Text></View>
-            ))}
+          <SectionTitle title="IDIOMAS" />
+          <View style={styles.card}>
+            <LanguageTable data={resumeData.languages} />
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>[ IDIOMAS ]</Text>
-          <View style={styles.card}><LanguageTable data={resumeData.languages} /></View>
-        </View>
-
         <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>DOWNLOAD SYSTEM SPECS (PDF)</Text>
+          <Text style={styles.buttonText}>ESTABELECER CONEXÃO (DOWNLOAD PDF)</Text>
         </TouchableOpacity>
 
       </ScrollView>
@@ -174,46 +214,50 @@ const App = () => {
 };
 
 // --- ESTILOS ---
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
   scrollContent: { padding: 20, paddingBottom: 40 },
-  headerCard: { alignItems: 'center', marginBottom: 30, padding: 20, borderWidth: 1, borderColor: '#FF0000', elevation: 5 },
-  profileHexagon: { width: 90, height: 90, backgroundColor: '#FF0000', transform: [{ rotate: '45deg' }], marginBottom: 20, justifyContent: 'center', alignItems: 'center' },
-  profileInner: { width: 80, height: 80, backgroundColor: '#1a1a1a' },
-  nameText: { color: '#FF0000', fontSize: 22, fontWeight: 'bold', textTransform: 'uppercase', textAlign: 'center' },
-  subTitle: { color: '#fff', fontSize: 13, textAlign: 'center', marginTop: 5 },
-  location: { color: '#FF0000', fontSize: 12, marginTop: 5, fontWeight: 'bold' },
-  contactBar: { marginTop: 15, alignItems: 'center' },
-  contactLink: { color: '#ccc', fontSize: 11, textDecorationLine: 'underline', marginBottom: 2 },
-  section: { marginBottom: 30 },
-  sectionTitle: { color: '#FF0000', fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
+  headerCard: { alignItems: 'center', marginBottom: 30, padding: 20, borderWidth: 1, borderColor: '#FF0000' },
+  profileHexagon: { width: 70, height: 70, backgroundColor: '#FF0000', transform: [{ rotate: '45deg' }], marginBottom: 20 },
+  profileInner: { width: 60, height: 60, backgroundColor: '#000', margin: 5 },
+  nameText: { color: '#FF0000', fontSize: 20, fontWeight: 'bold', textAlign: 'center' },
+  subTitle: { color: '#fff', fontSize: 12, textAlign: 'center', marginTop: 5 },
+  location: { color: '#FF0000', fontSize: 11, marginTop: 5, letterSpacing: 2 },
+  iconContainer: { flexDirection: 'row', marginTop: 20, justifyContent: 'center', gap: 25 },
+  socialIcon: { opacity: 0.9 },
+  section: { marginBottom: 25 },
+  sectionTitle: { color: '#FF0000', fontSize: 16, fontWeight: 'bold', marginBottom: 10 },
   card: { backgroundColor: '#0a0a0a', padding: 15, borderWidth: 0.5, borderColor: '#333', borderLeftWidth: 3, borderLeftColor: '#FF0000' },
-  summaryText: { color: '#eee', fontSize: 14, lineHeight: 20 },
+  summaryText: { color: '#eee', fontSize: 13, lineHeight: 18 },
+  highlightText: { color: '#FF0000', fontWeight: 'bold', fontSize: 11, marginBottom: 2 },
+  
   timelineItem: { flexDirection: 'row' },
   timelineVisual: { width: 30, alignItems: 'center' },
-  timelineDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: '#FF0000' },
-  timelineLine: { flex: 1, width: 2, backgroundColor: '#FF0000', opacity: 0.3 },
+  timelineDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#FF0000' },
+  timelineLine: { flex: 1, width: 1, backgroundColor: '#FF0000', opacity: 0.3 },
   timelineContent: { flex: 1, paddingLeft: 10, paddingBottom: 20 },
-  roleText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  companyText: { color: '#FF0000', fontSize: 14, marginVertical: 2 },
-  periodText: { color: '#ccc', fontSize: 12, marginBottom: 5 },
-  descText: { color: '#eee', fontSize: 13, lineHeight: 18 },
-  cardTitle: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  cardInfo: { color: '#ccc', fontSize: 14, marginVertical: 4 },
-  cardPeriod: { color: '#aaa', fontSize: 12 },
-  cardStatus: { color: '#FF0000', fontSize: 11, fontWeight: 'bold', marginTop: 4 },
+  roleText: { color: '#fff', fontSize: 15, fontWeight: 'bold' },
+  companyText: { color: '#FF0000', fontSize: 13 },
+  periodText: { color: '#888', fontSize: 11, marginBottom: 5 },
+  descText: { color: '#ccc', fontSize: 12, lineHeight: 16 },
+  
+  cardTitle: { color: '#fff', fontSize: 15, fontWeight: 'bold' },
+  cardInfo: { color: '#ccc', fontSize: 13, marginVertical: 2 },
+  cardStatus: { color: '#FF0000', fontSize: 10, fontWeight: 'bold' },
+  
   skillsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  skillBadge: { paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: '#FF0000' },
-  skillText: { color: '#fff', fontSize: 11, fontWeight: 'bold' },
-  softSkillBadge: { paddingHorizontal: 10, paddingVertical: 5, borderWidth: 1, borderColor: '#333', borderRadius: 15 },
-  softSkillText: { color: '#ccc', fontSize: 11 },
+  skillBadge: { paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1, borderColor: '#FF0000' },
+  skillText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
+  
+  // Estilos da Tabela de Idiomas
   table: { marginTop: 5 },
-  tableRow: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: '#333', paddingVertical: 8 },
-  tableCell: { fontSize: 13 },
-  tableCellLabel: { color: '#fff', width: '40%' },
-  tableCellLevel: { color: '#FF0000', fontWeight: 'bold', width: '60%', textAlign: 'right' },
+  tableRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 5 },
+  tableCellLabel: { color: '#fff', fontSize: 13 },
+  tableCellLevel: { color: '#FF0000', fontWeight: 'bold', fontSize: 12 },
+  
   button: { backgroundColor: '#FF0000', padding: 16, alignItems: 'center', marginTop: 10 },
-  buttonText: { color: '#000', fontWeight: 'bold', fontSize: 14 },
+  buttonText: { color: '#000', fontWeight: 'bold', fontSize: 12 },
 });
 
 export default App;
